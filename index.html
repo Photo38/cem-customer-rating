@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบประเมินความพึงพอใจ</title>
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        h2 { color: #333; margin-bottom: 5px; }
+        p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        
+        /* Star Rating Style */
+        .rating { display: flex; flex-direction: row-reverse; justify-content: center; margin-bottom: 20px; }
+        .rating input { display: none; }
+        .rating label { font-size: 40px; color: #ddd; cursor: pointer; transition: 0.2s; }
+        .rating input:checked ~ label { color: #ffcc00; }
+        .rating label:hover, .rating label:hover ~ label { color: #ffdb33; }
+
+        textarea { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 20px; font-family: inherit; }
+        button { background-color: #00b900; color: white; border: none; padding: 12px 25px; border-radius: 25px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; }
+        button:disabled { background-color: #ccc; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ประเมินบริการของเรา</h2>
+    <p>แอดมินที่ดูแลคุณ: <span id="admin-display" style="font-weight: bold; color: #00b900;">...</span></p>
+    
+    <form id="ratingForm">
+        <input type="hidden" name="adminName" id="adminNameInput">
+        
+        <div class="rating">
+            <input type="radio" name="rating" value="5" id="5"><label for="5">☆</label>
+            <input type="radio" name="rating" value="4" id="4"><label for="4">☆</label>
+            <input type="radio" name="rating" value="3" id="3"><label for="3">☆</label>
+            <input type="radio" name="rating" value="2" id="2"><label for="2">☆</label>
+            <input type="radio" name="rating" value="1" id="1"><label for="1">☆</label>
+        </div>
+
+        <textarea name="feedback" rows="3" placeholder="ข้อเสนอแนะเพิ่มเติม (ถ้ามี)"></textarea>
+        
+        <button type="submit" id="submitBtn">ส่งข้อมูล</button>
+    </form>
+</div>
+
+<script>
+    // 1. ดึงชื่อแอดมินจาก URL (เช่น ?admin=Somchai)
+    const urlParams = new URLSearchParams(window.location.search);
+    const adminName = urlParams.get('admin') || 'General';
+    document.getElementById('admin-display').innerText = adminName;
+    document.getElementById('adminNameInput').value = adminName;
+
+    // 2. ตั้งค่า Web App URL ของคุณที่นี่
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyuBmJXt5-b3o3l6Z5ggPwWcwfKgsayijcbzoPUyhGBrUHVcVwh5iddco4PQe0unXtK/exec';
+
+    document.getElementById('ratingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const rating = document.querySelector('input[name="rating"]:checked');
+        if (!rating) {
+            alert('กรุณาเลือกดาวเพื่อประเมินคะแนนครับ');
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = 'กำลังส่งข้อมูล...';
+
+        const formData = new FormData(this);
+        const queryString = new URLSearchParams(formData).toString();
+
+        fetch(WEB_APP_URL + '?' + queryString, { method: 'POST' })
+            .then(res => {
+                alert('ขอบคุณสำหรับคำแนะนำครับ!');
+                window.location.reload(); // รีเซ็ตหน้าจอ
+            })
+            .catch(err => {
+                alert('เกิดข้อผิดพลาด กรุณาลองใหม่ครับ');
+                btn.disabled = false;
+                btn.innerText = 'ส่งข้อมูล';
+            });
+    });
+</script>
+
+</body>
+</html>
